@@ -15,14 +15,14 @@ import java.util.List;
 
 /*
   tela principal da partida : gerencia entidades, colisões, vidas e progressão de nível
-  
-  P2 - implementar Player, Bullet, Asteroid, Enemy, Boss e SpawnManager 
+
+  P2 - implementar Player, Bullet, Asteroid, Enemy, Boss e SpawnManager
   P3 - substituir formas geométricas por sprites PNG em renderSprite(), adicionar sons, animar explosões
-       
+
   coordenadas (LibGDX padrão)
   Y = 0 na base da tela; Y = GameConfig#WINDOW_HEIGHT no topo
   asteroides nascem acima do topo e caem (Y diminui)
-  balas do player sobem (Y cresce), balas de inimigos descem (Y diminui)  
+  balas do player sobem (Y cresce), balas de inimigos descem (Y diminui)
 */
 public class GameScreen implements Screen {
     //constantes
@@ -30,7 +30,7 @@ public class GameScreen implements Screen {
     private static final float DURACAO_INVENCIVEL = 2.0f;
 
     //dependências; contexto
-    private final Main jogo; 
+    private final Main jogo;
     //score com que esta sessão começou (0 para jogo novo; >0 ao vir de LevelComplete)
     private final int scoreInicial;
     //nível com que esta sessão começou
@@ -66,7 +66,7 @@ public class GameScreen implements Screen {
     //construtores
     /*
       usado ao continuar do LevelCompleteScreen, mantém score e começa no próximo nível
-      
+
       jogo = referência central
       scoreInicial = score acumulado até aqui
       nivelInicial = nível a iniciar
@@ -80,7 +80,7 @@ public class GameScreen implements Screen {
     public GameScreen(Main jogo) {
         this(jogo, 0, GameConfig.START_LEVEL);
     }
-    //screen - ciclo de vida 
+    //screen - ciclo de vida
     @Override
     public void show() {
         //gráficos
@@ -114,8 +114,8 @@ public class GameScreen implements Screen {
         balasInimigos = new ArrayList<>();
 
         boss = levelManager.temBoss()
-                ? new Boss(centroX - 36f, GameConfig.WINDOW_HEIGHT - 110f)
-                : null;
+            ? new Boss(centroX - 36f, GameConfig.WINDOW_HEIGHT - 110f)
+            : null;
 
         invencivel      = false;
         timerInvencivel = 0f;
@@ -171,14 +171,20 @@ public class GameScreen implements Screen {
         while (it.hasNext()) {
             Bullet b = it.next();
             b.update(delta);
-            if (!b.isAlive() || b.getY() > GameConfig.WINDOW_HEIGHT) it.remove();
+            if (!b.isAlive() || b.getY() > GameConfig.WINDOW_HEIGHT) {
+                b.dispose();
+                it.remove();
+            }
         }
         //balas de inimigos : remove ao sair pela base
         Iterator<Bullet> itI = balasInimigos.iterator();
         while (itI.hasNext()) {
             Bullet b = itI.next();
             b.update(delta);
-            if (!b.isAlive() || b.getY() + b.getHeight() < 0f) itI.remove();
+            if (!b.isAlive() || b.getY() + b.getHeight() < 0f) {
+                b.dispose();
+                itI.remove();
+            }
         }
     }
 
@@ -188,9 +194,10 @@ public class GameScreen implements Screen {
             Asteroid a = it.next();
             a.update(delta);
             if (!a.isAlive()) {
+                a.dispose();
                 it.remove();
             } else if (a.saioPelaBase()) {
-                //chegou à base sem ser destruído → perde uma vida
+                a.dispose();
                 it.remove();
                 aplicarDanoPlayer();
             }
@@ -204,6 +211,7 @@ public class GameScreen implements Screen {
             e.update(delta);
             if (!e.isAlive()) {
                 score += LevelManager.PONTOS_INIMIGO;
+                e.dispose();
                 it.remove();
             } else {
                 balasInimigos.addAll(e.coletarBalasFiras());
@@ -214,10 +222,13 @@ public class GameScreen implements Screen {
     private void atualizarBoss(float delta) {
         if (boss == null || bossDestruido) return;
         boss.update(delta);
-        balasInimigos.addAll(boss.coletarBalasFiras());
+        if (!boss.isExplodindo()) {
+            balasInimigos.addAll(boss.coletarBalasFiras());
+        }
         if (!boss.isAlive()) {
             bossDestruido = true;
             score += LevelManager.PONTOS_BOSS;
+            boss.dispose();
         }
     }
 
@@ -238,16 +249,16 @@ public class GameScreen implements Screen {
         for (Bullet b : balasPlayer) {
             if (!b.isAlive()) continue;
             for (Asteroid a : asteroides) {
-                if (!a.isAlive()) continue;
+                if (!a.isAlive() || a.isExplodindo()) continue;
                 if (CollisionManager.check(b, a)) {
                     b.destroy();
-                    a.destroy();
+                    a.explodir();
                     score += LevelManager.PONTOS_ASTEROIDE;
                 }
             }
         }
-        balasPlayer.removeIf(b -> !b.isAlive());
-        asteroides.removeIf(a -> !a.isAlive());
+        balasPlayer.removeIf(b -> { if (!b.isAlive()) b.dispose(); return !b.isAlive(); });
+        asteroides.removeIf(a -> { if (!a.isAlive()) a.dispose(); return !a.isAlive(); });
     }
 
     private void checarBalasPlayerVsInimigos() {
@@ -261,8 +272,8 @@ public class GameScreen implements Screen {
                 }
             }
         }
-        balasPlayer.removeIf(b -> !b.isAlive());
-        inimigos.removeIf(e -> !e.isAlive());
+        balasPlayer.removeIf(b -> { if (!b.isAlive()) b.dispose(); return !b.isAlive(); });
+        inimigos.removeIf(e -> { if (!e.isAlive()) e.dispose(); return !e.isAlive(); });
     }
 
     private void checarBalasPlayerVsBoss() {
@@ -274,7 +285,7 @@ public class GameScreen implements Screen {
                 boss.takeDamage(1);
             }
         }
-        balasPlayer.removeIf(b -> !b.isAlive());
+        balasPlayer.removeIf(b -> { if (!b.isAlive()) b.dispose(); return !b.isAlive(); });
     }
 
     private void checarAsteroidesVsPlayer() {
@@ -286,7 +297,7 @@ public class GameScreen implements Screen {
                 break; // só um hit por frame para não tirar várias vidas de uma vez
             }
         }
-        asteroides.removeIf(a -> !a.isAlive());
+        asteroides.removeIf(a -> { if (!a.isAlive()) a.dispose(); return !a.isAlive(); });
     }
 
     private void checarBalasInimigosVsPlayer() {
@@ -298,7 +309,7 @@ public class GameScreen implements Screen {
                 break;
             }
         }
-        balasInimigos.removeIf(b -> !b.isAlive());
+        balasInimigos.removeIf(b -> { if (!b.isAlive()) b.dispose(); return !b.isAlive(); });
     }
 
     private void checarInimigosVsPlayer() {
@@ -340,8 +351,8 @@ public class GameScreen implements Screen {
         } else {
             //wave spawnou tudo E não sobrou nenhuma entidade na tela
             concluido = spawnManager.waveCompleta(levelManager)
-                     && asteroides.isEmpty()
-                     && inimigos.isEmpty();
+                && asteroides.isEmpty()
+                && inimigos.isEmpty();
         }
 
         if (!concluido) return;
@@ -364,12 +375,12 @@ public class GameScreen implements Screen {
     //render
     private void desenhar() {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
-        //fase 1: ShapeRenderer - formas provisórias das entidades 
+        //fase 1: ShapeRenderer - formas provisórias das entidades
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (Asteroid a : asteroides)    a.renderShape(shapeRenderer);
         for (Enemy    e : inimigos)      e.renderShape(shapeRenderer);
-        if (boss != null && !bossDestruido) boss.renderShape(shapeRenderer);
+        if (boss != null && (!bossDestruido || boss.isExplodindo())) boss.renderShape(shapeRenderer);
         for (Bullet   b : balasPlayer)   b.renderShape(shapeRenderer);
         for (Bullet   b : balasInimigos) b.renderShape(shapeRenderer);
         //player pisca durante invencibilidade (8 Hz)
@@ -379,7 +390,7 @@ public class GameScreen implements Screen {
 
         shapeRenderer.end();
 
-        //fase 2: SpriteBatch, HUD + sprites futuros (P3) 
+        //fase 2: SpriteBatch, HUD + sprites futuros (P3)
         batch.begin();
         // HUD
         fonte.draw(batch, "Nivel: " + levelManager.getNivelAtual(), 10, 470);
@@ -392,7 +403,7 @@ public class GameScreen implements Screen {
         //sprites das entidades, P3 preenche os renderSprite() de cada classe
         for (Asteroid a : asteroides)    a.renderSprite(batch);
         for (Enemy    e : inimigos)      e.renderSprite(batch);
-        if (boss != null && !bossDestruido) boss.renderSprite(batch);
+        if (boss != null && (!bossDestruido || boss.isExplodindo())) boss.renderSprite(batch);
         for (Bullet   b : balasPlayer)   b.renderSprite(batch);
         for (Bullet   b : balasInimigos) b.renderSprite(batch);
         if (!invencivel || ((int)(timerInvencivel * 8)) % 2 == 0) {
@@ -413,5 +424,6 @@ public class GameScreen implements Screen {
         if (batch         != null) batch.dispose();
         if (fonte         != null) fonte.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
+        if (player        != null) player.dispose(); // libera som de tiro
     }
 }

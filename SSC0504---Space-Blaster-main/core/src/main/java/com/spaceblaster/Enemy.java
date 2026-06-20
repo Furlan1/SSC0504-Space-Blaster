@@ -1,6 +1,9 @@
 package com.spaceblaster;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
@@ -8,7 +11,7 @@ import java.util.List;
 
 /*
   inimigo normal que aparece a partir do nível 2
- 
+
   P2 — implementar e expandir esta classe. O stub atual move o inimigo horizontalmente (ricocheteando nas bordas) e atira para baixo a cada
   intervalo
   P3 - adiciona o sprite quando tiver os assets
@@ -24,6 +27,8 @@ public class Enemy extends Entity {
     protected float velocidadeX;
     private float timerTiro;
     private final List<Bullet> balasPendentes = new ArrayList<>();
+    //sprite do inimigo
+    private final Texture textura;
 
     //construtor
     /*
@@ -34,8 +39,17 @@ public class Enemy extends Entity {
     public Enemy(float x, float y, float velocidadeX) {
         super(x, y, LARGURA, ALTURA);
         this.velocidadeX = velocidadeX;
-        //escalonar o timer de início para os inimigos não atirarem todos juntos
         this.timerTiro = (float)(Math.random() * INTERVALO_TIRO);
+        this.textura = new Texture(Gdx.files.internal("images/ufoRed.png"));
+    }
+    //construtor interno para subclasses (Boss) que não usam o sprite do Enemy
+    protected Enemy(float x, float y, float velocidadeX, boolean carregarSprite) {
+        super(x, y, LARGURA, ALTURA);
+        this.velocidadeX = velocidadeX;
+        this.timerTiro   = (float)(Math.random() * INTERVALO_TIRO);
+        this.textura     = carregarSprite
+            ? new Texture(Gdx.files.internal("images/ufoRed.png"))
+            : null;
     }
     //construtor com velocidade padrão
     public Enemy(float x, float y) {
@@ -65,24 +79,24 @@ public class Enemy extends Entity {
     }
     @Override
     public void renderShape(ShapeRenderer renderer) {
-        // losango verde provisório pro P3 substituir por sprite
-        renderer.setColor(Color.GREEN);
-        renderer.triangle(
-            getCenterX(), y + height,     // topo
-            x,            getCenterY(),   // esquerda
-            x + width,    getCenterY()    // direita
-        );
-        renderer.triangle(
-            getCenterX(), y,              // base
-            x,            getCenterY(),   // esquerda
-            x + width,    getCenterY()    // direita
-        );
+        // vazio — sprite substitui o losango provisório
+    }
+
+    @Override
+    public void renderSprite(SpriteBatch batch) {
+        if (!alive || textura == null) return;
+        batch.draw(textura, x, y, width, height);
+    }
+
+    //libera textura — chamar quando o inimigo for removido
+    public void dispose() {
+        if (textura != null) textura.dispose();
     }
 
     //API para o GameScreen
     /*
       retorna e esvazia a lista de balas disparadas pelo inimigo nesse frame
-     
+
       retorna lista (talvez vazia) de novos Bullets
     */
     public List<Bullet> coletarBalasFiras() {
