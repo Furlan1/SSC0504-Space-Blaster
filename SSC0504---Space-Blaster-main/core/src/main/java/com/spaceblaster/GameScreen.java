@@ -55,6 +55,10 @@ public class GameScreen implements Screen {
     private boolean nivelCompleto;
     private boolean bossDestruido;
 
+    //conta quantos asteroides foram destruidos pelo jogador no nivel atual
+    //essa contagem sera usada para impedir que a fase acabe por desviar de todos os asteroides.
+    private int asteroidesDestruidos;
+
     //listas de entidades
     private Player         player;
     private List<Bullet>   balasPlayer;
@@ -121,6 +125,9 @@ public class GameScreen implements Screen {
         timerInvencivel = 0f;
         nivelCompleto   = false;
         bossDestruido   = false;
+
+        // reinicia a contagem de asteroides destruidos ao começar um novo nível
+        asteroidesDestruidos = 0;
     }
 
     @Override
@@ -147,7 +154,8 @@ public class GameScreen implements Screen {
         atualizarInimigos(delta);
         atualizarBoss(delta);
         tratarColisoes();
-        spawnManager.update(delta, levelManager, asteroides, inimigos);
+        //atualiza o spawn considerando quantos asteroides ja foram destruidos
+        spawnManager.update(delta, levelManager, asteroides, inimigos, asteroidesDestruidos);
         checarConclusaoNivel();
     }
 
@@ -199,7 +207,6 @@ public class GameScreen implements Screen {
             } else if (a.saioPelaBase()) {
                 a.dispose();
                 it.remove();
-                aplicarDanoPlayer();
             }
         }
     }
@@ -253,6 +260,10 @@ public class GameScreen implements Screen {
                 if (CollisionManager.check(b, a)) {
                     b.destroy();
                     a.explodir();
+
+                    //conta apenas asteroides destruídos pelo tiro do jogador.
+                    asteroidesDestruidos++;
+
                     score += LevelManager.PONTOS_ASTEROIDE;
                 }
             }
@@ -332,7 +343,6 @@ public class GameScreen implements Screen {
         if (invencivel) return;
         lives--;
         if (lives <= 0) {
-            jogo.getScoreManager().adicionarScore("Jogador", score);
             jogo.showGameOver(score);
         } else {
             invencivel      = true;
@@ -349,8 +359,13 @@ public class GameScreen implements Screen {
         if (levelManager.ehNivelBoss()) {
             concluido = bossDestruido;
         } else {
-            //wave spawnou tudo E não sobrou nenhuma entidade na tela
-            concluido = spawnManager.waveCompleta(levelManager)
+            //nas fases normais, a fase só termina quando o jogador destrói
+            //a quantidade mínima de asteroides definida pelo LevelManager, mesmo que a wave já tenha spawnado tudo.
+            //isso impede que o jogador vença apenas desviando dos asteroides sem enfrentá-los.
+            boolean objetivoAsteroidesAtingido = asteroidesDestruidos >= levelManager.getObjetivoAsteroides();
+
+            //objetivo cumprido e tela limpa de inimigos.
+            concluido = objetivoAsteroidesAtingido
                 && asteroides.isEmpty()
                 && inimigos.isEmpty();
         }
@@ -366,9 +381,9 @@ public class GameScreen implements Screen {
             levelManager.avancarNivel();
             jogo.mostrarNivelCompleto(nivelQueSaiu, score, bonus);
         } else {
-            //todos os 4 níveis concluídos : vitória
-            jogo.getScoreManager().adicionarScore("Jogador", score);
-            jogo.showGameOver(score); // TODO: criar YouWinScreen (opcional)
+            //todos os 4 níveis concluídos : mostra a tela de vitória
+            // salvamento de recorde centralizado na WinScreen.
+            jogo.showWinScreen(score); 
         }
     }
 
