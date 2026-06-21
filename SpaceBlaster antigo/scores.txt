@@ -1,5 +1,0 @@
-Ana,1500
-Carlos,1200
-Jogador,999
-Jogador,999
-Bia,900

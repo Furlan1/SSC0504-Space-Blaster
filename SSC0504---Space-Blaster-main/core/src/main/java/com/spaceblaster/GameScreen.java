@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -15,9 +16,6 @@ import java.util.List;
 
 /*
   tela principal da partida : gerencia entidades, colisões, vidas e progressão de nível
-
-  P2 - implementar Player, Bullet, Asteroid, Enemy, Boss e SpawnManager
-  P3 - substituir formas geométricas por sprites PNG em renderSprite(), adicionar sons, animar explosões
 
   coordenadas (LibGDX padrão)
   Y = 0 na base da tela; Y = GameConfig#WINDOW_HEIGHT no topo
@@ -38,7 +36,10 @@ public class GameScreen implements Screen {
 
     //gráficos
     private SpriteBatch   batch;
-    private BitmapFont    fonte;
+    private BitmapFont    fonte;        // score centralizado, destaque principal
+    private BitmapFont    fonteHud;    // texto menor pros cantos (nível, vidas)
+    private BitmapFont    fonteBoss;   // nome/fase do boss, bem grande pra intimidar
+    private GlyphLayout   layout;      // usado pra medir texto e centralizar na tela
     private ShapeRenderer shapeRenderer;
 
     //gerenciadores
@@ -90,9 +91,22 @@ public class GameScreen implements Screen {
         //gráficos
         batch         = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
-        fonte         = new BitmapFont();
-        fonte.getData().setScale(1.5f);
+        layout        = new GlyphLayout();
+
+        // fonte principal — score fica centralizado e em destaque
+        fonte = new BitmapFont();
+        fonte.getData().setScale(2f);
         fonte.setColor(Color.WHITE);
+
+        // fonte menor pra não poluir os cantos com texto gigante
+        fonteHud = new BitmapFont();
+        fonteHud.getData().setScale(1.4f);
+        fonteHud.setColor(Color.LIGHT_GRAY);
+
+        // fonte do boss maior que o resto pra deixar claro que é uma ameaça
+        fonteBoss = new BitmapFont();
+        fonteBoss.getData().setScale(1.6f);
+        fonteBoss.setColor(Color.RED);
 
         //estado
         score = scoreInicial;
@@ -383,16 +397,39 @@ public class GameScreen implements Screen {
         } else {
             //todos os 4 níveis concluídos : mostra a tela de vitória
             // salvamento de recorde centralizado na WinScreen.
-            jogo.showWinScreen(score); 
+            jogo.showWinScreen(score);
         }
     }
 
     //render
     private void desenhar() {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
-        //fase 1: ShapeRenderer - formas provisórias das entidades
+
+        // === fase 1: ShapeRenderer — barras da HUD + formas das entidades ===
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
+        // faixa escura semitransparente no topo pra o texto da HUD não se perder no fundo do espaço
+        shapeRenderer.setColor(0f, 0f, 0f, 0.55f);
+        shapeRenderer.rect(0, GameConfig.WINDOW_HEIGHT - 50, GameConfig.WINDOW_WIDTH, 50);
+
+        // barra de HP do boss — só aparece no nível 4, centralizada logo abaixo da faixa
+        if (levelManager.ehNivelBoss() && boss != null && !bossDestruido) {
+            float barW = GameConfig.WINDOW_WIDTH * 0.6f;
+            float barX = (GameConfig.WINDOW_WIDTH - barW) / 2f;
+            float barY = GameConfig.WINDOW_HEIGHT - 80;
+            float pct  = boss.getHp() / 20f;
+
+            // fundo cinza escuro pra mostrar o quanto de HP falta
+            shapeRenderer.setColor(0.25f, 0.25f, 0.25f, 1f);
+            shapeRenderer.rect(barX, barY, barW, 10);
+
+            // cor muda conforme o HP cai: verde → amarelo → vermelho
+            Color corHp = pct > 0.5f ? Color.GREEN : pct > 0.25f ? Color.YELLOW : Color.RED;
+            shapeRenderer.setColor(corHp);
+            shapeRenderer.rect(barX, barY, barW * pct, 10);
+        }
+
+        // entidades — shapes provisórios (ficam vazios quando sprite está ativo)
         for (Asteroid a : asteroides)    a.renderShape(shapeRenderer);
         for (Enemy    e : inimigos)      e.renderShape(shapeRenderer);
         if (boss != null && (!bossDestruido || boss.isExplodindo())) boss.renderShape(shapeRenderer);
@@ -405,16 +442,9 @@ public class GameScreen implements Screen {
 
         shapeRenderer.end();
 
-        //fase 2: SpriteBatch, HUD + sprites futuros (P3)
+        // === fase 2: SpriteBatch — sprites das entidades + texto da HUD ===
         batch.begin();
-        // HUD
-        fonte.draw(batch, "Nivel: " + levelManager.getNivelAtual(), 10, 470);
-        fonte.draw(batch, "Score: " + score,                        10, 445);
-        fonte.draw(batch, "Vidas: " + lives,                        10, 420);
-        if (levelManager.ehNivelBoss() && boss != null && !bossDestruido) {
-            String faseBoss = boss.estaFase2() ? " [FASE 2 - RAGE!]" : " [FASE 1]";
-            fonte.draw(batch, "BOSS HP: " + boss.getHp() + faseBoss, 200, 470);
-        }
+
         //sprites das entidades, P3 preenche os renderSprite() de cada classe
         for (Asteroid a : asteroides)    a.renderSprite(batch);
         for (Enemy    e : inimigos)      e.renderSprite(batch);
@@ -423,6 +453,40 @@ public class GameScreen implements Screen {
         for (Bullet   b : balasInimigos) b.renderSprite(batch);
         if (!invencivel || ((int)(timerInvencivel * 8)) % 2 == 0) {
             player.renderSprite(batch);
+        }
+
+        // === HUD ===
+        float topoHud = GameConfig.WINDOW_HEIGHT - 10; // linha base do texto, dentro da faixa escura
+
+        // nível no canto esquerdo — discreto, não precisa chamar atenção
+        fonteHud.setColor(Color.LIGHT_GRAY);
+        fonteHud.draw(batch, "NIVEL  " + levelManager.getNivelAtual(), 14, topoHud);
+
+        // score centralizado em destaque — é o que o jogador mais quer ver
+        String textoScore = "SCORE  " + score;
+        layout.setText(fonte, textoScore);
+        fonte.setColor(Color.WHITE);
+        fonte.draw(batch, textoScore, (GameConfig.WINDOW_WIDTH - layout.width) / 2f, topoHud);
+
+        // corações de vida no canto direito
+        // ♥ = vida restante, · = vida perdida
+        StringBuilder vidas = new StringBuilder();
+        for (int i = 0; i < GameConfig.INITIAL_LIVES; i++) {
+            vidas.append(i < lives ? "♥ " : "· ");
+        }
+        layout.setText(fonteHud, vidas.toString());
+        fonteHud.setColor(Color.RED);
+        fonteHud.draw(batch, vidas.toString(), GameConfig.WINDOW_WIDTH - layout.width - 14, topoHud);
+
+        // nome e fase do boss centralizado abaixo da barra de HP
+        // fica laranja e com estrela na fase 2 pra deixar claro que ficou mais perigoso
+        if (levelManager.ehNivelBoss() && boss != null && !bossDestruido) {
+            String textoFase = boss.estaFase2() ? "★ BOSS — FASE 2: RAGE ★" : "BOSS — FASE 1";
+            layout.setText(fonteBoss, textoFase);
+            fonteBoss.setColor(boss.estaFase2() ? Color.ORANGE : Color.RED);
+            fonteBoss.draw(batch, textoFase,
+                (GameConfig.WINDOW_WIDTH - layout.width) / 2f,
+                GameConfig.WINDOW_HEIGHT - 92);
         }
 
         batch.end();
@@ -438,7 +502,9 @@ public class GameScreen implements Screen {
     public void dispose() {
         if (batch         != null) batch.dispose();
         if (fonte         != null) fonte.dispose();
+        if (fonteHud      != null) fonteHud.dispose();
+        if (fonteBoss     != null) fonteBoss.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
-        if (player        != null) player.dispose(); // libera som de tiro
+        if (player        != null) player.dispose(); // libera som de tiro e sprite
     }
 }

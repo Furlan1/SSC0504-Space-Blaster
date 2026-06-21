@@ -3,6 +3,7 @@ package com.spaceblaster;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -19,6 +20,7 @@ public class GameOverScreen implements Screen {
     private int scoreFinal;
     private boolean isNovoRecorde;
     private ScoreManager scoreManager;
+    private Sound somGameOver; // toca uma vez quando a tela abre
 
     // Controla qual opção do menu de Game Over está selecionada.
     // 0 = jogar novamente, 1 = voltar ao menu principal, 2 = sair do jogo.
@@ -55,6 +57,10 @@ public class GameOverScreen implements Screen {
         fonteSelecionada = new BitmapFont();
         fonteSelecionada.setColor(Color.YELLOW);
         fonteSelecionada.getData().setScale(2f);
+
+        // carrega e toca o som assim que a tela aparece
+        somGameOver = Gdx.audio.newSound(Gdx.files.internal("sounds/76376__deleted_user_877451__game_over.wav"));
+        somGameOver.play(1.0f);
     }
 
     @Override
@@ -93,7 +99,7 @@ public class GameOverScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
             opcaoSelecionada = (opcaoSelecionada - 1 + opcoes.length) % opcoes.length;
         }
-        
+
         // Executa a ação da opção selecionada.
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             if (opcaoSelecionada == 0) {
@@ -119,5 +125,6 @@ public class GameOverScreen implements Screen {
         fonteTitulo.dispose();
         fonteNormal.dispose();
         fonteSelecionada.dispose();
+        if (somGameOver != null) somGameOver.dispose();
     }
 }
