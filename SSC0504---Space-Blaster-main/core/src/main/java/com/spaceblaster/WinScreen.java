@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.audio.Sound;
 
 public class WinScreen implements Screen {
 
@@ -20,6 +21,9 @@ public class WinScreen implements Screen {
     private int scoreFinal;
     private boolean isNovoRecorde;
     private ScoreManager scoreManager;
+    // Som tocado uma vez quando a tela de vitória é exibida.
+    private Sound somVitoria;
+    private Sound somTrocaOpcao; // toca ao navegar no menu
 
     // Controla qual opção da tela de vitória está selecionada.
     // 0 = jogar novamente, 1 = voltar ao menu principal, 2 = sair do jogo.
@@ -59,6 +63,10 @@ public class WinScreen implements Screen {
         fonteSelecionada = new BitmapFont();
         fonteSelecionada.setColor(Color.YELLOW);
         fonteSelecionada.getData().setScale(2f);
+
+        somVitoria = Gdx.audio.newSound(Gdx.files.internal("sounds/mixkit-video-game-win-2016.wav"));
+        somVitoria.play(0.7f);
+        somTrocaOpcao = Gdx.audio.newSound(Gdx.files.internal("sounds/menu-change.wav"));
     }
 
     @Override
@@ -88,10 +96,12 @@ public class WinScreen implements Screen {
         // Navega pelas opções usando o tamanho do vetor.
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             opcaoSelecionada = (opcaoSelecionada + 1) % opcoes.length;
+            somTrocaOpcao.play(0.5f);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
             opcaoSelecionada = (opcaoSelecionada - 1 + opcoes.length) % opcoes.length;
+            somTrocaOpcao.play(0.5f);
         }
 
         // Executa a ação escolhida pelo jogador.
@@ -128,5 +138,12 @@ public class WinScreen implements Screen {
         fonteTitulo.dispose();
         fonteNormal.dispose();
         fonteSelecionada.dispose();
+
+        if(somVitoria != null) {
+            somVitoria.dispose();
+        }
+        if(somTrocaOpcao != null) {
+            somTrocaOpcao.dispose();
+        }
     }
 }

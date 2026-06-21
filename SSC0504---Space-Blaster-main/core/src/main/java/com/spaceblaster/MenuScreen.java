@@ -7,12 +7,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.audio.Sound;
 
 public class MenuScreen implements Screen {
     private Main jogo;
     private SpriteBatch batch;
     private BitmapFont font;
     private BitmapFont selectedFont;
+    private Sound somTrocaOpcao; // Som tocado ao navegar no menu
 
     // opcao selecionada: 0 = Start, 1 = High Scores, 2 = Exit
     private int opcaoSelecionada = 0;
@@ -36,6 +38,7 @@ public class MenuScreen implements Screen {
         selectedFont = new BitmapFont();
         selectedFont.setColor(Color.YELLOW);
         selectedFont.getData().setScale(2.5f);
+        somTrocaOpcao = Gdx.audio.newSound(Gdx.files.internal("sounds/menu-change.wav"));
     }
 
     @Override
@@ -63,9 +66,11 @@ public class MenuScreen implements Screen {
         // controles do teclado
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             opcaoSelecionada = (opcaoSelecionada + 1) % opcoes.length;
+            somTrocaOpcao.play(0.5f);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
             opcaoSelecionada = (opcaoSelecionada - 1 + opcoes.length) % opcoes.length;
+            somTrocaOpcao.play(0.5f);
         }
 
         // Executa a opcao selecionada.
@@ -98,5 +103,9 @@ public class MenuScreen implements Screen {
         batch.dispose();
         font.dispose();
         selectedFont.dispose();
+
+        if(somTrocaOpcao != null) {
+            somTrocaOpcao.dispose();
+        }
     }
 }

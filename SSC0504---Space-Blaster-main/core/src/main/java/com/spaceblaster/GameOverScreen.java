@@ -21,6 +21,7 @@ public class GameOverScreen implements Screen {
     private boolean isNovoRecorde;
     private ScoreManager scoreManager;
     private Sound somGameOver; // toca uma vez quando a tela abre
+    private Sound somTrocaOpcao; // toca ao navegar no menu
 
     // Controla qual opção do menu de Game Over está selecionada.
     // 0 = jogar novamente, 1 = voltar ao menu principal, 2 = sair do jogo.
@@ -61,6 +62,7 @@ public class GameOverScreen implements Screen {
         // carrega e toca o som assim que a tela aparece
         somGameOver = Gdx.audio.newSound(Gdx.files.internal("sounds/76376__deleted_user_877451__game_over.wav"));
         somGameOver.play(1.0f);
+        somTrocaOpcao = Gdx.audio.newSound(Gdx.files.internal("sounds/menu-change.wav"));
     }
 
     @Override
@@ -95,9 +97,11 @@ public class GameOverScreen implements Screen {
         // navegacao
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             opcaoSelecionada = (opcaoSelecionada + 1) % opcoes.length;
+            somTrocaOpcao.play(0.5f);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
             opcaoSelecionada = (opcaoSelecionada - 1 + opcoes.length) % opcoes.length;
+            somTrocaOpcao.play(0.5f);
         }
 
         // Executa a ação da opção selecionada.
@@ -126,5 +130,6 @@ public class GameOverScreen implements Screen {
         fonteNormal.dispose();
         fonteSelecionada.dispose();
         if (somGameOver != null) somGameOver.dispose();
+        if (somTrocaOpcao != null) somTrocaOpcao.dispose();
     }
 }
