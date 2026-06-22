@@ -88,7 +88,3 @@ O jogo salva automaticamente os melhores resultados no arquivo `scores.txt`, man
 - Tainá Felinto de Araujo   NUSP: 16922294
 
 Projeto desenvolvido em Java com LibGDX.
-
----
-
-Se quiser, também posso adaptar este README para um estilo mais **profissional**, mais **acadêmico** ou mais **“GitHub bonito”** com badges e seções extras.
