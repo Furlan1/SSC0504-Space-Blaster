@@ -3,16 +3,17 @@ package com.spaceblaster;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.audio.Sound;
 
-public class GameOverScreen implements Screen {
+public class WinScreen implements Screen {
 
     private Main jogo;
     private SpriteBatch batch;
+
     private BitmapFont fonteTitulo;
     private BitmapFont fonteNormal;
     private BitmapFont fonteSelecionada;
@@ -20,24 +21,28 @@ public class GameOverScreen implements Screen {
     private int scoreFinal;
     private boolean isNovoRecorde;
     private ScoreManager scoreManager;
-    private Sound somGameOver; // toca uma vez quando a tela abre
+    // Som tocado uma vez quando a tela de vitória é exibida.
+    private Sound somVitoria;
     private Sound somTrocaOpcao; // toca ao navegar no menu
 
-    // Controla qual opção do menu de Game Over está selecionada.
+    // Controla qual opção da tela de vitória está selecionada.
     // 0 = jogar novamente, 1 = voltar ao menu principal, 2 = sair do jogo.
     private int opcaoSelecionada = 0;
 
-    // Lista de opções disponíveis na tela de Game Over.
-    // Adicionamos "Main Menu" para permitir voltar ao menu e acessar os placares.
+    // Opções disponíveis após o jogador vencer o jogo.
+    // O menu principal permite acessar os placares.
     private final String[] opcoes = {"Play Again", "Main Menu", "Exit"};
 
-    public GameOverScreen(Main jogo, int scoreFinal, ScoreManager scoreManager) {
+    public WinScreen(Main jogo, int scoreFinal, ScoreManager scoreManager) {
         this.jogo = jogo;
         this.scoreFinal = scoreFinal;
         this.scoreManager = scoreManager;
+
+        // Verifica se o score final entra na lista de melhores pontuações.
         this.isNovoRecorde = scoreManager.isHighScore(scoreFinal);
 
-        // se for recorde, salva com nome generico por enquanto
+        // Salva o score apenas se for novo recorde.
+        // Por enquanto o nome é fixo porque o jogo ainda não possui entrada de nome do jogador.
         if (isNovoRecorde) {
             scoreManager.adicionarScore("Jogador", scoreFinal);
         }
@@ -48,7 +53,7 @@ public class GameOverScreen implements Screen {
         batch = new SpriteBatch();
 
         fonteTitulo = new BitmapFont();
-        fonteTitulo.setColor(Color.RED);
+        fonteTitulo.setColor(Color.GREEN);
         fonteTitulo.getData().setScale(3f);
 
         fonteNormal = new BitmapFont();
@@ -59,31 +64,25 @@ public class GameOverScreen implements Screen {
         fonteSelecionada.setColor(Color.YELLOW);
         fonteSelecionada.getData().setScale(2f);
 
-        // carrega e toca o som assim que a tela aparece
-        somGameOver = Gdx.audio.newSound(Gdx.files.internal("sounds/76376__deleted_user_877451__game_over.wav"));
-        somGameOver.play(1.0f);
+        somVitoria = Gdx.audio.newSound(Gdx.files.internal("sounds/mixkit-video-game-win-2016.wav"));
+        somVitoria.play(0.7f);
         somTrocaOpcao = Gdx.audio.newSound(Gdx.files.internal("sounds/menu-change.wav"));
     }
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0, 1);
+        ScreenUtils.clear(0, 0.05f, 0.1f, 1);
 
         batch.begin();
 
-        // titulo GAME OVER em vermelho
-        fonteTitulo.draw(batch, "GAME OVER", 200, 420);
+        fonteTitulo.draw(batch, "VITORIA!", 230, 420);
+        fonteNormal.draw(batch, "Score final: " + scoreFinal, 210, 340);
 
-        // score final
-        fonteNormal.draw(batch, "Score: " + scoreFinal, 260, 340);
-
-        // mensagem de novo recorde
         if (isNovoRecorde) {
-            fonteSelecionada.draw(batch, "NOVO RECORDE!", 230, 300);
+            fonteSelecionada.draw(batch, "NOVO RECORDE!", 220, 300);
         }
 
-        // opcoes
-        String[] opcoes = {"Play Again", "Main Menu", "Exit"};
+        // Desenha as opções da tela e destaca a opção selecionada.
         for (int i = 0; i < opcoes.length; i++) {
             if (i == opcaoSelecionada) {
                 fonteSelecionada.draw(batch, "> " + opcoes[i], 240, 230 - (i * 60));
@@ -94,23 +93,22 @@ public class GameOverScreen implements Screen {
 
         batch.end();
 
-        // navegacao
+        // Navega pelas opções usando o tamanho do vetor.
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             opcaoSelecionada = (opcaoSelecionada + 1) % opcoes.length;
             somTrocaOpcao.play(0.5f);
         }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
             opcaoSelecionada = (opcaoSelecionada - 1 + opcoes.length) % opcoes.length;
             somTrocaOpcao.play(0.5f);
         }
 
-        // Executa a ação da opção selecionada.
+        // Executa a ação escolhida pelo jogador.
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             if (opcaoSelecionada == 0) {
-                // Reinicia a partida usando o fluxo centralizado do Main.
                 jogo.startGame();
             } else if (opcaoSelecionada == 1) {
-                //Volta para o menu principal, onde o jogador pode acessar os placares e outras opções.
                 jogo.showMenu();
             } else {
                 Gdx.app.exit();
@@ -118,10 +116,21 @@ public class GameOverScreen implements Screen {
         }
     }
 
-    @Override public void resize(int width, int height) {}
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() {}
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+    }
 
     @Override
     public void dispose() {
@@ -129,7 +138,12 @@ public class GameOverScreen implements Screen {
         fonteTitulo.dispose();
         fonteNormal.dispose();
         fonteSelecionada.dispose();
-        if (somGameOver != null) somGameOver.dispose();
-        if (somTrocaOpcao != null) somTrocaOpcao.dispose();
+
+        if(somVitoria != null) {
+            somVitoria.dispose();
+        }
+        if(somTrocaOpcao != null) {
+            somTrocaOpcao.dispose();
+        }
     }
 }

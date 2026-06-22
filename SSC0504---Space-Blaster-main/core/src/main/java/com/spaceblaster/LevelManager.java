@@ -39,10 +39,15 @@ public class LevelManager {
     private static final float[] VEL_MAX_ASTEROIDE = {150f, 210f, 270f, 230f };
 
     //intervalo em segundos entre spawns de asteroides. 
-    private static final float[] INTERVALO_SPAWN   = { 2.0f, 1.5f, 1.0f, 1.5f };
+    private static final float[] INTERVALO_SPAWN   = { 1.8f, 1.3f, 0.9f, 1.4f };
 
     //tamanho da wave (total de asteroides que vão spawnar no nível)
-    private static final int[]   TAMANHO_WAVE      = {  20,   30,  40,   15 };
+    private static final int[]   TAMANHO_WAVE      = {  22,   34,  46,   18 };
+
+    // Quantidade mínima de asteroides que o jogador precisa destruir para concluir cada nível.
+    // Nas fases 1, 2 e 3, isso impede que o jogador vença apenas desviando dos asteroides.
+    // Na fase 4, o objetivo principal é derrotar o Boss, então o valor fica 0.
+    private static final int[] OBJETIVO_ASTEROIDES = {12, 19, 25, 0};
 
     //se inimigos regulares aparecem no nível
     private static final boolean[] TEM_INIMIGOS    = { false, true, true, false };
@@ -102,6 +107,12 @@ public class LevelManager {
 
     //retorna tamanho da wave — total de asteroides para este nível
     public int getTamanhoWave()       { return TAMANHO_WAVE[nivelAtual - 1]; }
+
+    // Retorna quantos asteroides precisam ser destruídos para concluir o nível atual.
+    // No nível do Boss, esse valor é 0 porque a vitória depende de derrotar o Boss.
+    public int getObjetivoAsteroides() {
+        return OBJETIVO_ASTEROIDES[nivelAtual - 1];
+    }
 
     //retorna true se inimigos regulares aparecem neste nível
     public boolean temInimigos()      { return TEM_INIMIGOS[nivelAtual - 1]; }

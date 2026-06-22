@@ -49,10 +49,10 @@ public class InstructionsScreen implements Screen {
         // controles
         fonteNormal.draw(batch, "CONTROLES:", 80, 360);
         fonteDestaque.draw(batch, "Seta Esquerda / Direita", 80, 320);
-        fonteNormal.draw(batch, "Mover a nave", 340, 320);
+        fonteNormal.draw(batch, "Mover a nave", 460, 320);
 
         fonteDestaque.draw(batch, "Barra de Espaco", 80, 275);
-        fonteNormal.draw(batch, "Atirar", 340, 275);
+        fonteNormal.draw(batch, "Atirar", 460, 275);
 
         // linha divisoria
         fonteNormal.draw(batch, "--------------------------------", 80, 245);

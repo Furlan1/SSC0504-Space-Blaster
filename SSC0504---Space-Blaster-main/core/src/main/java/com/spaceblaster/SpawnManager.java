@@ -33,10 +33,19 @@ public class SpawnManager {
       inimigos = lista de inimigos ativos, entidades são adicionadas aqui
     */
     public void update(float delta, LevelManager lvl,
-                       List<Asteroid> asteroides, List<Enemy> inimigos) {
+                       List<Asteroid> asteroides, List<Enemy> inimigos,
+                       int asteroidesDestruidos) {
         int totalWave = lvl.getTamanhoWave();
+
+        //nas fases normais, os asteroides continuam aparecendo enquanto
+        // o jogador ainda não atingiu o objetivo de asteroides destruídos.
+        //na fase do boss, mantemos uma wave limitada de asteroides como pressão extra
+        boolean deveSpawnarAsteroides = lvl.ehNivelBoss()
+                        ? asteroideSpawnados < totalWave
+                        : asteroidesDestruidos < lvl.getObjetivoAsteroides();
+                        
         //spawn de asteroides 
-        if (asteroideSpawnados < totalWave) {
+        if (deveSpawnarAsteroides) {
             timerSpawn -= delta;
             if (timerSpawn <= 0f) {
                 timerSpawn = lvl.getIntervaloSpawn();

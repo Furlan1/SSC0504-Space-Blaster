@@ -69,6 +69,11 @@ public class Main extends Game {
     public void showGameOver(int scoreFinal) {
         trocarTela(new GameOverScreen(this, scoreFinal, scoreManager));
     }
+    // Mostra a tela de vitória quando o jogador conclui todos os níveis.
+    // Mantemos esse método no Main para centralizar a navegação entre telas.
+    public void showWinScreen(int scoreFinal) {
+        trocarTela(new WinScreen(this, scoreFinal, scoreManager));
+}
     //exibe a tela de high scores
     public void showHighScores() {
         trocarTela(new HighScoresScreen(this));
