@@ -83,6 +83,10 @@ O jogo salva automaticamente os melhores resultados no arquivo `scores.txt`, man
 
 ## 👨‍💻 Créditos
 
+- Caio Mendes Laprega   NUSP: 17018950
+- Gustavo Furlan Lourenço   NUSP: 16871332
+- Tainá Felinto de Araujo   NUSP: 16922294
+
 Projeto desenvolvido em Java com LibGDX.
 
 ---
