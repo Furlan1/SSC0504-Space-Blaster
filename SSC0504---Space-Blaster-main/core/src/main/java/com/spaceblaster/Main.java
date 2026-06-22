@@ -3,63 +3,93 @@ package com.spaceblaster;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 
-// Classe principal do jogo.
-// Ela controla o ciclo de vida do LibGDX e centraliza a troca entre telas.
+/*
+  classe principal do jogo, ponto de entrada do LibGDX
+ 
+  centraliza toda a navegação entre telas. Nenhuma tela deve instanciar outra diretamente, todas devem chamar um método deste Main
+*/
 public class Main extends Game {
-
-    // Mantido aqui para que as telas usem o mesmo gerenciador de pontuacao.
+    //ScoreManager compartilhado por todas as telas 
     private ScoreManager scoreManager;
-
+    //ciclo de vida LibGDX 
+    @Override
     public void create() {
         scoreManager = new ScoreManager();
         showMenu();
     }
 
-    // Os metodos abaixo centralizam a navegacao.
-    // Assim, as telas nao precisam criar outras telas diretamente com setScreen().
+    @Override
+    public void dispose() {
+        if (getScreen() != null) getScreen().dispose();
+        super.dispose();
+    }
+
+    //navegação, métodos chamados pelas telas
+    //vai para o menu principal
     public void showMenu() {
-        changeScreen(new MenuScreen(this));
+        trocarTela(new MenuScreen(this));
     }
 
+    //vai para a tela de instruções (antes de começar a partida)
     public void showInstructions() {
-        changeScreen(new InstructionsScreen(this));
+        trocarTela(new InstructionsScreen(this));
     }
 
+    /*
+      inicia uma partida nova do zero
+      score = 0, nível = GameConfig#START_LEVEL
+    */
     public void startGame() {
-        changeScreen(new GameScreen(this));
+        trocarTela(new GameScreen(this));
     }
 
-    public void showHighScores() {
-        changeScreen(new HighScoresScreen(this));
+    /*
+      continua para o próximo nível mantendo o score
+      chamado por LevelCompleteScreen quando o jogador pressiona ENTER
+     
+      scoreAtual = score acumulado (já inclui bônus do nível anterior)
+      proximoNivel = número do próximo nível a ser iniciado
+    */
+    public void continuarProximoNivel(int scoreAtual, int proximoNivel) {
+        trocarTela(new GameScreen(this, scoreAtual, proximoNivel));
     }
 
+    /*
+      exibe a tela de conclusão de nível
+      chamado pelo GameScreen quando a wave( ou boss ) é derrotada
+     
+      nivelConcluido = número do nível que acabou de ser concluído
+      scoreAtual = score total (já incluindo o bônus deste nível)
+      bonusGanho = bônus de conclusão adicionado (mostrado na tela)
+    */
+    public void mostrarNivelCompleto(int nivelConcluido, int scoreAtual, int bonusGanho) {
+        trocarTela(new LevelCompleteScreen(this, nivelConcluido, scoreAtual, bonusGanho));
+    }
+    //exibe a tela de game over com o score final
     public void showGameOver(int scoreFinal) {
-        changeScreen(new GameOverScreen(this, scoreFinal, scoreManager));
+        trocarTela(new GameOverScreen(this, scoreFinal, scoreManager));
+    }
+    //exibe a tela de high scores
+    public void showHighScores() {
+        trocarTela(new HighScoresScreen(this));
     }
 
+    //acesso ao ScoreManager 
+    /*
+      retorna o ScoreManager compartilhado
+      usado pelo GameScreen para salvar score ao final da partida
+
+      retorna gerenciador de pontuações
+    */
     public ScoreManager getScoreManager() {
         return scoreManager;
     }
 
-    // Troca a tela atual pela nova e libera os recursos da tela anterior.
-    // Isso evita deixar fontes, batches e outros objetos graficos abertos na memoria.
-    private void changeScreen(Screen novaTela) {
+    //privado
+    //troca a tela atual pela nova e libera os recursos da anterior, evita vazamentos de memória   
+    private void trocarTela(Screen novaTela) {
         Screen telaAtual = getScreen();
-
         setScreen(novaTela);
-
-        if (telaAtual != null) {
-            telaAtual.dispose();
-        }
-    }
-
-    // Libera os recursos da tela atual antes de encerrar o jogo.
-    @Override
-    public void dispose() {
-        if (getScreen() != null) {
-            getScreen().dispose();
-        }
-
-        super.dispose();
+        if (telaAtual != null) telaAtual.dispose();
     }
 }
