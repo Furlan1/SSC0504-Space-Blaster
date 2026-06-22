@@ -49,6 +49,11 @@ public class LevelManager {
     // Na fase 4, o objetivo principal é derrotar o Boss, então o valor fica 0.
     private static final int[] OBJETIVO_ASTEROIDES = {12, 19, 25, 0};
 
+    // Quantidade mínima de asteroides que o jogador precisa destruir para concluir cada nível.
+    // Nas fases 1, 2 e 3, isso impede que o jogador vença apenas desviando dos asteroides.
+    // Na fase 4, o objetivo principal é derrotar o Boss, então o valor fica 0.
+    private static final int[] OBJETIVO_ASTEROIDES = {10, 16, 22, 0};
+
     //se inimigos regulares aparecem no nível
     private static final boolean[] TEM_INIMIGOS    = { false, true, true, false };
 
