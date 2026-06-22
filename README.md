@@ -3,12 +3,12 @@
 **Space Blaster** é um jogo 2D de nave espacial desenvolvido em **Java** com **LibGDX/LWJGL3**.  
 O objetivo é destruir asteroides, enfrentar inimigos e derrotar o boss para concluir as 4 fases.
 
-## 🎮 Sobre o jogo
+## Sobre o jogo
 
 No comando da sua nave, você precisa sobreviver às ondas de asteroides, eliminar inimigos e acumular pontos.  
 A dificuldade aumenta a cada nível e a última fase traz uma batalha contra um boss com duas fases de ataque.
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 - 4 níveis de progressão
 - Boss na fase final
@@ -21,7 +21,7 @@ A dificuldade aumenta a cada nível e a última fase traz uma batalha contra um 
 - Menu principal com navegação por teclado
 - Efeitos sonoros e sprites do jogo
 
-## 🕹️ Controles
+## Controles
 
 ### Menu
 - **↑ / ↓**: navegar pelas opções
@@ -36,7 +36,7 @@ A dificuldade aumenta a cada nível e a última fase traz uma batalha contra um 
 - **↑ / ↓**: navegar
 - **ENTER**: confirmar
 
-## 🧩 Regras básicas
+## Regras básicas
 
 - Destrua asteroides para ganhar pontos
 - Evite colisões com asteroides, inimigos e tiros inimigos
@@ -44,14 +44,14 @@ A dificuldade aumenta a cada nível e a última fase traz uma batalha contra um 
 - Nas fases 1, 2 e 3, é preciso destruir uma quantidade mínima de asteroides para concluir o nível
 - Na fase 4, o objetivo é derrotar o boss
 
-## 🛠️ Tecnologias utilizadas
+## Tecnologias utilizadas
 
 - **Java 8**
 - **LibGDX**
 - **LWJGL3**
 - **Gradle**
 
-## 🚀 Como executar o projeto
+## Como executar o projeto
 
 ### Pré-requisitos
 - Java 8 ou superior
@@ -70,18 +70,18 @@ No Windows:
 gradlew.bat lwjgl3:run
 ```
 
-## 📁 Estrutura do projeto
+## Estrutura do projeto
 
 - `core/` — lógica principal do jogo
 - `lwjgl3/` — launcher desktop
 - `assets/` — imagens, sons e demais recursos
 - `scores.txt` — arquivo usado para salvar os melhores scores localmente
 
-## 🏆 Sistema de pontuação
+## Sistema de pontuação
 
 O jogo salva automaticamente os melhores resultados no arquivo `scores.txt`, mantendo o top 5 de pontuações.
 
-## 👨‍💻 Créditos
+## Créditos
 
 - Caio Mendes Laprega   NUSP: 17018950
 - Gustavo Furlan Lourenço   NUSP: 16871332
