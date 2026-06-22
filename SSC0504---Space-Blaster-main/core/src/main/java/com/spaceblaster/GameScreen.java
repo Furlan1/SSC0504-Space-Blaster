@@ -60,6 +60,13 @@ public class GameScreen implements Screen {
     //essa contagem sera usada para impedir que a fase acabe por desviar de todos os asteroides.
     private int asteroidesDestruidos;
 
+    // conta quantos asteroides passaram pela base em sequencia.
+    private int asteroidesPerdidosConsecutivos;
+
+    //valor base da penalidade por deixar asteroides passarem em sequencia
+    //penalidade cresce conforme a sequencia de asteroides perdidos aumenta, e reseta ao destruir um asteroide.
+    private static final int PENALIDADE_ASTEROIDE_PERDIDO = 25;
+
     //listas de entidades
     private Player         player;
     private List<Bullet>   balasPlayer;
@@ -142,6 +149,8 @@ public class GameScreen implements Screen {
 
         // reinicia a contagem de asteroides destruidos ao começar um novo nível
         asteroidesDestruidos = 0;
+        // reinicia a contagem de asteroides perdidos ao começar um novo nível
+        asteroidesPerdidosConsecutivos = 0;
     }
 
     @Override
@@ -219,6 +228,16 @@ public class GameScreen implements Screen {
                 a.dispose();
                 it.remove();
             } else if (a.saioPelaBase()) {
+                //aumenta uma sequencia de asteroides perdidos.
+                asteroidesPerdidosConsecutivos++;
+
+                //o primeiro asteroide perdido nao gera penalidade
+                if (asteroidesPerdidosConsecutivos >= 2) {
+                    int penalidade = PENALIDADE_ASTEROIDE_PERDIDO * asteroidesPerdidosConsecutivos;
+
+                    //garante que o placar nunca fique negativo por causa de penalidades
+                    score = Math.max(0, score - penalidade);
+                }
                 a.dispose();
                 it.remove();
             }
@@ -277,6 +296,7 @@ public class GameScreen implements Screen {
 
                     //conta apenas asteroides destruídos pelo tiro do jogador.
                     asteroidesDestruidos++;
+                    asteroidesPerdidosConsecutivos = 0; // reseta a penalidade por asteroides perdidos ao destruir um
 
                     score += LevelManager.PONTOS_ASTEROIDE;
                 }
