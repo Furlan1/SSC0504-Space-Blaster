@@ -48,21 +48,35 @@ A dificuldade cresce progressivamente: os asteroides ficam mais rápidos, surgem
 
 O jogo possui 4 fases, cada uma com parâmetros próprios de dificuldade:
 
-| Nível | Velocidade dos asteroides | Intervalo de spawn | Inimigos | Boss | Bônus de conclusão |
-|------:|---------------------------:|-------------------:|:--------:|:----:|-------------------:|
-| 1 | 80–150 px/s | 1,8 s | Não | Não | 500 pts |
-| 2 | 130–210 px/s | 1,3 s | Sim | Não | 1.000 pts |
-| 3 | 180–270 px/s | 0,9 s | Sim | Não | 1.500 pts |
-| 4 | 150–230 px/s | 1,4 s | Não | Sim | 2.000 pts |
+| Nível | Velocidade dos asteroides | Intervalo de spawn | Inimigos | Boss | Objetivo principal     | Bônus de conclusão |
+| ----: | ------------------------- | ------------------ | :------: | :--: | ---------------------- | -----------------: |
+|     1 | 80–150 px/s               | 1,8 s              |    Não   |  Não | Destruir 10 asteroides |            500 pts |
+|     2 | 130–210 px/s              | 1,3 s              |    Sim   |  Não | Destruir 16 asteroides |          1.000 pts |
+|     3 | 180–270 px/s              | 0,9 s              |    Sim   |  Não | Destruir 22 asteroides |          1.500 pts |
+|     4 | 150–230 px/s              | 1,4 s              |    Não   |  Sim | Derrotar o boss        |          2.000 pts |
+
+Nas fases 1, 2 e 3, o jogador precisa destruir uma quantidade mínima de asteroides para avançar. Isso impede que o nível seja concluído apenas desviando dos obstáculos. Na fase 4, o objetivo principal é derrotar o boss.
 
 ## Pontuação
 
-- **Asteroide destruído**: 10 pontos
-- **Inimigo destruído**: 25 pontos
-- **Boss derrotado**: 500 pontos
-- **Bônus por concluir o nível**: varia conforme a fase
+* **Asteroide destruído**: 10 pontos
+* **Inimigo destruído**: 25 pontos
+* **Boss derrotado**: 500 pontos
+* **Bônus por concluir o nível**: varia conforme a fase
 
-Os melhores resultados são salvos localmente no arquivo `scores.txt`, mantendo apenas o top 5.
+Além da pontuação por destruir asteroides, inimigos e o boss, o jogo possui uma penalidade para evitar que o jogador apenas desvie dos obstáculos. Quando asteroides passam pela parte inferior da tela sem serem destruídos, o jogo conta uma sequência de asteroides perdidos.
+
+O primeiro asteroide perdido consecutivamente não gera punição. A partir do segundo, a pontuação é reduzida de forma progressiva:
+
+| Sequência de asteroides perdidos |  Penalidade |
+| -------------------------------: | ----------: |
+|         2º asteroide consecutivo |  -50 pontos |
+|         3º asteroide consecutivo |  -75 pontos |
+|         4º asteroide consecutivo | -100 pontos |
+
+A penalidade é calculada com base na sequência de asteroides perdidos, usando 25 pontos multiplicados pela quantidade consecutiva de asteroides que passaram. Quando o jogador destrói um asteroide, essa sequência é reiniciada. A pontuação nunca fica abaixo de 0.
+
+Os melhores resultados são salvos localmente em um arquivo `scores.txt`, mantendo apenas o top 5. Esse arquivo é gerado durante a execução do jogo e pode variar de acordo com os testes feitos em cada máquina.
 
 ## Tecnologias utilizadas
 
@@ -98,7 +112,7 @@ Se o projeto estiver dentro da pasta `SSC0504---Space-Blaster-main`, acesse essa
 - `core/` — lógica principal do jogo
 - `lwjgl3/` — launcher desktop
 - `assets/` — imagens, sons e demais recursos
-- `scores.txt` — arquivo usado para salvar os melhores scores localmente
+- `scores.txt` — arquivo gerado localmente durante a execução para salvar os melhores scores
 
 ## Arquitetura em alto nível
 
