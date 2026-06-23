@@ -1,17 +1,17 @@
 # Space Blaster
 
-**Space Blaster** é um jogo 2D de nave espacial desenvolvido em **Java** com **LibGDX/LWJGL3**.  
-O objetivo é destruir asteroides, enfrentar inimigos e derrotar o boss para concluir as 4 fases.
+**Space Blaster** é um jogo 2D de nave espacial desenvolvido em **Java** com **LibGDX** e **LWJGL3**.  
+O objetivo é sobreviver às ondas de asteroides, destruir inimigos, enfrentar o boss final e completar as 4 fases do jogo.
 
-## Sobre o jogo
+## Visão geral
 
-No comando da sua nave, você precisa sobreviver às ondas de asteroides, eliminar inimigos e acumular pontos.  
-A dificuldade aumenta a cada nível e a última fase traz uma batalha contra um boss com duas fases de ataque.
+No comando da sua nave, você precisa gerenciar movimentação, tiros e posicionamento para acumular pontos e avançar pelos níveis.  
+A dificuldade cresce progressivamente: os asteroides ficam mais rápidos, surgem inimigos em fases intermediárias e, na fase final, o desafio é derrotar o boss.
 
-## Funcionalidades
+## Principais recursos
 
 - 4 níveis de progressão
-- Boss na fase final
+- Fase final com boss
 - Sistema de vidas
 - Pontuação por asteroides, inimigos e boss
 - Tela de instruções
@@ -23,9 +23,9 @@ A dificuldade aumenta a cada nível e a última fase traz uma batalha contra um 
 
 ## Controles
 
-### Menu
+### Menu e telas de navegação
 - **↑ / ↓**: navegar pelas opções
-- **ENTER**: confirmar
+- **ENTER**: confirmar a seleção
 
 ### Durante a partida
 - **← / →**: mover a nave
@@ -33,10 +33,10 @@ A dificuldade aumenta a cada nível e a última fase traz uma batalha contra um 
 - **ESC**: voltar ao menu principal
 
 ### Telas de fim de jogo
-- **↑ / ↓**: navegar
+- **↑ / ↓**: navegar pelas opções
 - **ENTER**: confirmar
 
-## Regras básicas
+## Regras do jogo
 
 - Destrua asteroides para ganhar pontos
 - Evite colisões com asteroides, inimigos e tiros inimigos
@@ -44,21 +44,42 @@ A dificuldade aumenta a cada nível e a última fase traz uma batalha contra um 
 - Nas fases 1, 2 e 3, é preciso destruir uma quantidade mínima de asteroides para concluir o nível
 - Na fase 4, o objetivo é derrotar o boss
 
+## Progressão dos níveis
+
+O jogo possui 4 fases, cada uma com parâmetros próprios de dificuldade:
+
+| Nível | Velocidade dos asteroides | Intervalo de spawn | Inimigos | Boss | Bônus de conclusão |
+|------:|---------------------------:|-------------------:|:--------:|:----:|-------------------:|
+| 1 | 80–150 px/s | 1,8 s | Não | Não | 500 pts |
+| 2 | 130–210 px/s | 1,3 s | Sim | Não | 1.000 pts |
+| 3 | 180–270 px/s | 0,9 s | Sim | Não | 1.500 pts |
+| 4 | 150–230 px/s | 1,4 s | Não | Sim | 2.000 pts |
+
+## Pontuação
+
+- **Asteroide destruído**: 10 pontos
+- **Inimigo destruído**: 25 pontos
+- **Boss derrotado**: 500 pontos
+- **Bônus por concluir o nível**: varia conforme a fase
+
+Os melhores resultados são salvos localmente no arquivo `scores.txt`, mantendo apenas o top 5.
+
 ## Tecnologias utilizadas
 
 - **Java 8**
-- **LibGDX**
-- **LWJGL3**
+- **LibGDX 1.14.2**
+- **LWJGL3 3.4.1**
 - **Gradle**
 
-## Como executar o projeto
+## Como executar
 
 ### Pré-requisitos
 - Java 8 ou superior
 - Gradle Wrapper incluído no projeto
 
-### Executando no desktop
-No terminal, dentro da pasta do projeto, execute:
+### Execução no desktop
+
+Entre na pasta raiz do projeto e execute:
 
 ```bash
 ./gradlew lwjgl3:run
@@ -70,6 +91,8 @@ No Windows:
 gradlew.bat lwjgl3:run
 ```
 
+Se o projeto estiver dentro da pasta `SSC0504---Space-Blaster-main`, acesse essa pasta antes de rodar o comando.
+
 ## Estrutura do projeto
 
 - `core/` — lógica principal do jogo
@@ -77,14 +100,21 @@ gradlew.bat lwjgl3:run
 - `assets/` — imagens, sons e demais recursos
 - `scores.txt` — arquivo usado para salvar os melhores scores localmente
 
-## Sistema de pontuação
+## Arquitetura em alto nível
 
-O jogo salva automaticamente os melhores resultados no arquivo `scores.txt`, mantendo o top 5 de pontuações.
+O projeto organiza a navegação entre telas em uma classe principal (`Main`) e separa a lógica do jogo em componentes como:
+
+- `GameScreen` — partida principal
+- `SpawnManager` — geração de asteroides e inimigos
+- `LevelManager` — regras de progressão e dificuldade
+- `ScoreManager` — persistência do ranking local
+
+Essa divisão ajuda a manter o código mais limpo e facilita futuras expansões do jogo.
 
 ## Créditos
 
-- Caio Mendes Laprega   NUSP: 17018950
-- Gustavo Furlan Lourenço   NUSP: 16871332
-- Tainá Felinto de Araujo   NUSP: 16922294
+- Caio Mendes Laprega — NUSP: 17018950
+- Gustavo Furlan Lourenço — NUSP: 16871332
+- Tainá Felinto de Araujo — NUSP: 16922294
 
 Projeto desenvolvido em Java com LibGDX.
